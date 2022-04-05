@@ -1,6 +1,8 @@
-﻿using Pocketsphinx;
+﻿using System;
+using Pocketsphinx;
 using System.Collections;
 using System.IO;
+using Facebook.WitAi.Data;
 using TarCs;
 using UnityEngine;
 using UnityEngine.Events;
@@ -28,7 +30,12 @@ public class PocketSphinxDecoder : MonoBehaviour
     public delegate void SpeechRecognizedHandler(string phrase);
     public event SpeechRecognizedHandler OnSpeechRecognized;
 
+    [SerializeField] private UnityEvent onDecoderInitialized = new UnityEvent();
     [SerializeField] private UnityEvent<string> onSpeechRecognized = new UnityEvent<string>();
+    [SerializeField] private int decoderBufferSize = 5000;
+
+    private byte[] decodingBuffer;
+    private RingBuffer<byte>.Marker audioBufferMarker;
 
     private IEnumerator Start()
     {
@@ -85,6 +92,8 @@ public class PocketSphinxDecoder : MonoBehaviour
 
         // Starts the decoder.
         d.StartUtt();
+
+        onDecoderInitialized.Invoke();
         Debug.Log("<color=green><b>Decoder initialized!</b></color>");
     }
 
@@ -168,12 +177,33 @@ public class PocketSphinxDecoder : MonoBehaviour
         Debug.Log("<color=green><b>Decompress complete!</b></color>");
     }
 
-    public void OnDataReady(byte[] data, int offset, int length)
+    private void OnEnable()
     {
-        // Decoder isn't initialized yet, ignore incoming data
-        if (null == d) return;
+        AudioBuffer.Instance.StartRecording(this);
+        audioBufferMarker = AudioBuffer.Instance.CreateMarker();
+    }
 
-        d.ProcessRaw(data, length, false, false);
+    private void OnDisable()
+    {
+        AudioBuffer.Instance.StopRecording(this);
+    }
+
+    private void Update()
+    {
+        if (null == d) return;
+        if (audioBufferMarker.AvailableByteCount < decoderBufferSize) return;
+
+        audioBufferMarker.ReadIntoWriters(Decode);
+    }
+
+    private void Decode(byte[] buffer, int offset, int length)
+    {
+        if (null == decodingBuffer || decodingBuffer.Length != length)
+        {
+            decodingBuffer = new byte[length];
+        }
+        Array.Copy(buffer, offset, decodingBuffer, 0, length);
+        d.ProcessRaw(decodingBuffer, decodingBuffer.Length, false, false);
 
         // Checks if we recognize a keyphrase.
         if (d.Hyp() != null)
