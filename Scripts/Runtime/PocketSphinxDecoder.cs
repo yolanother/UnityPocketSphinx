@@ -2,7 +2,6 @@
 using Pocketsphinx;
 using System.Collections;
 using System.IO;
-using Facebook.WitAi.Data;
 using TarCs;
 using UnityEngine;
 using UnityEngine.Events;
@@ -35,7 +34,6 @@ public class PocketSphinxDecoder : MonoBehaviour
     [SerializeField] private int decoderBufferSize = 5000;
 
     private byte[] decodingBuffer;
-    private RingBuffer<byte>.Marker audioBufferMarker;
 
     private IEnumerator Start()
     {
@@ -177,26 +175,7 @@ public class PocketSphinxDecoder : MonoBehaviour
         Debug.Log("<color=green><b>Decompress complete!</b></color>");
     }
 
-    private void OnEnable()
-    {
-        AudioBuffer.Instance.StartRecording(this);
-        audioBufferMarker = AudioBuffer.Instance.CreateMarker();
-    }
-
-    private void OnDisable()
-    {
-        AudioBuffer.Instance.StopRecording(this);
-    }
-
-    private void Update()
-    {
-        if (null == d) return;
-        if (audioBufferMarker.AvailableByteCount < decoderBufferSize) return;
-
-        audioBufferMarker.ReadIntoWriters(Decode);
-    }
-
-    private void Decode(byte[] buffer, int offset, int length)
+    public void Decode(byte[] buffer, int offset, int length)
     {
         if (null == decodingBuffer || decodingBuffer.Length != length)
         {
