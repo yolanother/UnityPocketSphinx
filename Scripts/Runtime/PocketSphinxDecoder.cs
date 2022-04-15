@@ -3,6 +3,7 @@ using Pocketsphinx;
 using System.Collections;
 using System.IO;
 using TarCs;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Networking;
@@ -177,6 +178,8 @@ public class PocketSphinxDecoder : MonoBehaviour
 
     public void Decode(byte[] buffer, int offset, int length)
     {
+        if (!enabled) return;
+
         if (null == decodingBuffer || decodingBuffer.Length != length)
         {
             decodingBuffer = new byte[length];
