@@ -170,6 +170,7 @@ public class PocketSphinxDecoder : MonoBehaviour
 
         TarReader reader = new TarReader(dataStream);
         // Unpack your .tar file into your persistentDataPath.
+        Directory.CreateDirectory(Application.persistentDataPath);
         reader.ReadToEnd(Application.persistentDataPath);
         yield return null;
 
@@ -178,7 +179,7 @@ public class PocketSphinxDecoder : MonoBehaviour
 
     public void Decode(byte[] buffer, int offset, int length)
     {
-        if (!enabled) return;
+        if (null == d || !enabled) return;
 
         if (null == decodingBuffer || decodingBuffer.Length != length)
         {
