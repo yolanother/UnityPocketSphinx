@@ -1,7 +1,11 @@
 {
     "name": "DoubTech.PocketSphinx",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:3e1dc341b45ea4085a39c1ed871c6789",
+        "GUID:e318f38ae6a4548f78d5e1ae3ca9737e",
+        "GUID:40e1e92fcd78f42ebb1139bb142fa0e3"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
