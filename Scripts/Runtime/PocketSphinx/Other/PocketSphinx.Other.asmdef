@@ -1,12 +1,11 @@
 {
-    "name": "PocketSphinx",
+    "name": "PocketSphinx.Other",
     "rootNamespace": "",
-    "references": [
-        "GUID:301d5905a2e81d347b2ba2a29fdcd01a",
-        "GUID:4db1ebe7a0009c74d8219d8e39b12ca0"
-    ],
+    "references": [],
     "includePlatforms": [],
-    "excludePlatforms": [],
+    "excludePlatforms": [
+        "Android"
+    ],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],

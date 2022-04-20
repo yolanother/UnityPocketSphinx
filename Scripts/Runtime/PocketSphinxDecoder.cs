@@ -1,7 +1,14 @@
 ﻿using System;
-using Pocketsphinx;
 using System.Collections;
 using System.IO;
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+using PocketSphinx;
+using SphinxBase;
+#else
+using Pocketsphinx;
+#endif
+
 using TarCs;
 using UnityEngine;
 using UnityEngine.Events;
@@ -43,10 +50,37 @@ public class PocketSphinxDecoder : MonoBehaviour
         //SetupDecoderLM();
     }
 
+    private void Log(string message)
+    {
+#if UNITY_EDITOR
+        Debug.Log("[PocketSphinx] <color=white>" + message + "</color>");
+#else
+        Debug.Log("[PocketSphinx] " + message);
+#endif
+    }
+
+    private void LogSuccess(string message)
+    {
+#if UNITY_EDITOR
+        Debug.Log("[PocketSphinx] <color=green><b>" + message + "</b></color>");
+#else
+        Debug.Log("[PocketSphinx] " + message);
+#endif
+    }
+
+    private void LogE(string message)
+    {
+#if UNITY_EDITOR
+        Debug.Log("[PocketSphinx] <color=red>" + message + "</color>");
+#else
+        Debug.LogError("[PocketSphinx] " + message);
+#endif
+    }
+
     // Desc: Creates a new decoder looking for specific keyphrases.
     private void SetupDecoderKWS()
     {
-        Debug.Log("<color=red>Initializing decoder...</color>");
+        Log("Initializing decoder...");
         // Create a new configuration for our decoder.
         Config c = Decoder.DefaultConfig();
         // Find our decompressed acoustic model.
@@ -92,7 +126,7 @@ public class PocketSphinxDecoder : MonoBehaviour
         d.StartUtt();
 
         onDecoderInitialized.Invoke();
-        Debug.Log("<color=green><b>Decoder initialized!</b></color>");
+        LogSuccess("Decoder initialized!");
     }
 
     // Desc: Creates a new decoder looking for any words. Instead of looking for a specific keyword, attempts to interpret what you say and turn it into text.
@@ -134,7 +168,7 @@ public class PocketSphinxDecoder : MonoBehaviour
 
         // Starts the decoder.
         d.StartUtt();
-        Debug.Log("<color=green><b>Decoder initialized!</b></color>");
+        LogSuccess("Decoder initialized!");
     }
 
     /*  Locates and decompresses your language model.
@@ -143,7 +177,7 @@ public class PocketSphinxDecoder : MonoBehaviour
     */
     private IEnumerator Decompress()
     {
-        Debug.Log("<color=red>Decompressing language model...</color>");
+        Log("Decompressing language model...");
         // Locate your language model.
         string dataPath = Path.Combine(Application.streamingAssetsPath, lang + ".tar");
         Stream dataStream;
@@ -173,7 +207,7 @@ public class PocketSphinxDecoder : MonoBehaviour
         reader.ReadToEnd(Application.persistentDataPath);
         yield return null;
 
-        Debug.Log("<color=green><b>Decompress complete!</b></color>");
+        LogSuccess("Decompress complete!");
     }
 
     public void Decode(byte[] buffer, int offset, int length)
@@ -196,7 +230,7 @@ public class PocketSphinxDecoder : MonoBehaviour
                 OnSpeechRecognized.Invoke(d.Hyp().Hypstr);
             }
             onSpeechRecognized.Invoke(d.Hyp().Hypstr);
-            Debug.Log("Recognized " + d.Hyp().Hypstr);
+            Log("Recognized " + d.Hyp().Hypstr);
             // Stop the decoder.
             d.EndUtt();
             // Start the decoder again.
